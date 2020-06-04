@@ -3,13 +3,13 @@
 <suite guice-stage="DEVELOPMENT" name="Failed suite [Default suite]">
   <test thread-count="5" name="Default test(failed)">
     <classes>
-      <class name="eshopping.eshopping.Shopping">
+      <class name="eshopping.eshopping.WomenSHoppingSIte">
         <methods>
-          <include name="tearDown"/>
-          <include name="Register"/>
           <include name="setUp"/>
+          <include name="Register" invocation-numbers="0 1 2"/>
+          <include name="tearDown"/>
         </methods>
-      </class> <!-- eshopping.eshopping.Shopping -->
+      </class> <!-- eshopping.eshopping.WomenSHoppingSIte -->
     </classes>
   </test> <!-- Default test(failed) -->
 </suite> <!-- Failed suite [Default suite] -->

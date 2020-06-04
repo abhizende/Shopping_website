@@ -7,10 +7,13 @@ import java.io.IOException;
 import java.security.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -19,14 +22,18 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import com.excel.utility.TestUtil;
+import com.excel.utility.Xls_Reader;
 
 @Test
 public class Shopping {
 	
 	WebDriver driver;
 	
-   	@BeforeMethod
+	@BeforeMethod
 	public void setUp() 
 	{
 		System.setProperty("webdriver.chrome.driver", System.getProperty("user.dir")+"//src//test//java//Exe//chromedriver.exe");
@@ -34,67 +41,92 @@ public class Shopping {
 		driver.manage().window().maximize();
 		driver.manage().deleteAllCookies();
 		
-		driver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS); //Page load timeout
-		driver.manage().timeouts().implicitlyWait(30,TimeUnit.SECONDS); //Implicit wait
-		driver.get("http://automationpractice.com/index.php"); //Enter url
+		driver.manage().timeouts().pageLoadTimeout(40, TimeUnit.SECONDS); //Page load timeout
+		driver.manage().timeouts().implicitlyWait(40,TimeUnit.SECONDS); //Implicit wait
+		
 	}
 	
-	@Test
-	public void Register() throws IOException, InterruptedException 
+   	
+   	@DataProvider
+   	public Iterator<Object[]> getTestData() 
+   	{
+   		ArrayList<Object[]> testData=TestUtil.getDatafromExcel();
+   		return testData.iterator();
+   	}
+   	
+	@Test(dataProvider = "getTestData")
+	public void Register(String EmailAddress,String FirstName,String LastName, String Password, String Day, 
+			String Month, String Year,String Company,String AddressLine1,String City, String State,
+			String Zip, String Country, String MobilePhone) throws IOException, InterruptedException 
 	{
+		
 		//Extracting time-stamp for unique email id
 		DateFormat df= new SimpleDateFormat("ddMMyyHHmmss");
 	    Date dateobj = new Date();
 	    String date=df.format(dateobj);
 	    System.out.println(date);
+	    
+	    driver.get("http://automationpractice.com/index.php"); //Enter url
 		
 	    System.out.println("***Home screen****");
 	    driver.findElement(By.xpath("//a[@class='login']")).click();
 	    
 	    System.out.println("***Sign In screen****");
-		driver.findElement(By.xpath("//input[@id='email_create']")).sendKeys(date+"@test.com");
+	   
+		driver.findElement(By.xpath("//input[@id='email_create']")).sendKeys(date+EmailAddress);
 		driver.findElement(By.xpath("//*[@id='SubmitCreate']/span")).click();
 		
 		driver.findElement(By.xpath("//*[@id='id_gender1']")).click();
-		driver.findElement(By.xpath("//*[@id='customer_firstname']")).sendKeys("FirstName");
-		driver.findElement(By.xpath("//*[@id='customer_lastname']")).sendKeys("LastName");
-		driver.findElement(By.xpath("//*[@id='passwd']")).sendKeys("Test1234");
+		
+		driver.findElement(By.xpath("//*[@id='customer_firstname']")).sendKeys(FirstName);
+		
+		driver.findElement(By.xpath("//*[@id='customer_lastname']")).sendKeys(LastName);
+		
+		driver.findElement(By.xpath("//*[@id='passwd']")).sendKeys(Password);
 		
 		Select day=new Select(driver.findElement(By.xpath("//*[@id='days']")));
-		day.selectByValue("19");
+		day.selectByValue(Day.substring(0,2));
+		
 		
 		Select mon=new Select(driver.findElement(By.xpath("//*[@id='months']")));
 		mon.selectByValue("7");
 		
+		System.out.println(Year);
 		Select yr=new Select(driver.findElement(By.xpath("//*[@id='years']")));
 		yr.selectByValue("1994");
 		
-		driver.findElement(By.xpath("//*[@id='company']")).sendKeys("Company");
-		driver.findElement(By.xpath("//*[@id='address1']")).sendKeys("Line 1, PO -1234, Company");
-		driver.findElement(By.xpath("//*[@id='city']")).sendKeys("NeyYork");
+		driver.findElement(By.xpath("//*[@id='company']")).sendKeys(Company);
 		
+		driver.findElement(By.xpath("//*[@id='address1']")).sendKeys(AddressLine1);
+		
+		driver.findElement(By.xpath("//*[@id='city']")).sendKeys(City);
+		
+		System.out.println(State);
 		Select state=new Select(driver.findElement(By.xpath("//*[@id='id_state']")));
 		state.selectByValue("11");
 		
+		System.out.println(Zip);
 		driver.findElement(By.xpath("//*[@id='postcode']")).sendKeys("12345");
 		
 		Select con=new Select(driver.findElement(By.xpath("//*[@id='id_country']")));
 		con.selectByValue("21");
 		
-		driver.findElement(By.xpath("//*[@id='phone_mobile']")).sendKeys("1234567890");
+		driver.findElement(By.xpath("//*[@id='phone_mobile']")).sendKeys("123456789");
+		
 		driver.findElement(By.xpath("//*[@id='alias']")).clear();
 		driver.findElement(By.xpath("//*[@id='alias']")).sendKeys("FirstName");
 		
 		driver.findElement(By.xpath("//*[@id='submitAccount']/span")).click();
 	    System.out.println("***Sign In screen completed****");
-
-		
-		System.out.println("***Account screen****");
+	    
+	  	System.out.println("***Account screen****");
 		driver.findElement(By.xpath("//*[@id='block_top_menu']/ul/li[1]/a")).click();
 		
 		System.out.println("***Women section screen****");
+		Thread.sleep(3000);
 		driver.findElement(By.xpath("//img[@class='replace-2x img-responsive' and @title='Faded Short Sleeve T-shirts']")).click();
 		
+		Thread.sleep(3000);
 		driver.switchTo().frame(0);
 		System.out.println("***Women apparel pop up****");
 		driver.findElement(By.xpath("//*[@id='quantity_wanted']")).clear();
@@ -186,7 +218,7 @@ public class Shopping {
 		
 		//Verifying the total price on Order history screen
 		Assert.assertEquals(price_total,tot);
-		
+	    
 	}
 	
 	@AfterMethod
@@ -194,5 +226,6 @@ public class Shopping {
 	{
 		driver.quit();
 	}
+
 
 }
